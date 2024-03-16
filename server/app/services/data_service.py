@@ -1,8 +1,14 @@
+'''
+Descripttion: your project
+Author: Jerry_Liweeeee
+Date: 2024-03-15 16:30:19
+'''
 # 将处理数据上传和查询、计算方差的业务逻辑。
 from flask import jsonify
 import json
 import numpy as np
-from app.models.dataset_model import DataStorage
+from app.models.dataset_model import Dataset
+
 
 def upload_data(request):
     file = request.files.get('file')  # 从请求中获取上传的文件
@@ -11,7 +17,7 @@ def upload_data(request):
     
     try:
         json_data = json.loads(file.read())  # 读取文件内容并转换成JSON
-        DataStorage.add_data(json_data)  # 将JSON数据添加到存储中
+        Dataset.insert(json_data)  # 插入数据到MongoDB
         return jsonify({'message': 'Data uploaded successfully'}), 201  # 返回成功消息
     except Exception as e:
         return jsonify({'error': 'Invalid JSON format', 'message': str(e)}), 400  # 如果JSON格式错误，返回错误
@@ -19,8 +25,8 @@ def upload_data(request):
 def query_data(key):
     if not key:
         return jsonify({'error': 'No key provided'}), 400  # 如果key参数不存在，返回错误
-
-    results = DataStorage.query_by_key(key)  # 从存储中查询数据
+    
+    results = Dataset.find_by_key(key)  # 从MongoDB查询数据
     if results:
         return jsonify({'results': results}), 200  # 如果查询到数据，返回数据
     else:
