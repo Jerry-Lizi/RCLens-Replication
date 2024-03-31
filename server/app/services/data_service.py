@@ -3,11 +3,18 @@ Descripttion: your project
 Author: Jerry_Liweeeee
 Date: 2024-03-15 16:30:19
 '''
+'''
+Descripttion: your project
+Author: Jerry_Liweeeee
+Date: 2024-03-15 16:30:19
+'''
 # 将处理数据上传和查询、计算方差的业务逻辑。
 from flask import jsonify
 import json
 import numpy as np
 from app.models.dataset_model import Dataset
+from sklearn.neighbors import LocalOutlierFactor
+from app.services.preprocess import preprocess_data #引用数据预处理的函数
 
 
 def upload_data(request):
@@ -53,3 +60,26 @@ def compute_variance(request):
         return jsonify({'variance': variances}), 200  # 返回方差
     except Exception as e:
         return jsonify({'error': 'Error processing data', 'message': str(e)}), 500  # 处理错误
+
+def preprocess_and_evaluate(data):
+    """
+    对数据进行预处理并计算LOF分数。
+    
+    参数:
+    data -- 以字典形式提供的原始数据
+    
+    返回:
+    包含LOF分数的字典
+    """
+    # 将字典转换为DataFrame
+    df = pd.DataFrame(data)
+    # 执行预处理
+    preprocessed_df = preprocess_data(df)
+    # 计算LOF分数
+    lof = LocalOutlierFactor()
+    lof_scores = -lof.fit_predict(preprocessed_df)
+    # 将LOF分数添加到原始DataFrame中
+    df['LOF_Score'] = lof_scores
+    # 转换为字典以便返回JSON
+    result = df.to_dict(orient='records')
+    return result

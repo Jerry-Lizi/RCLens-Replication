@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from app.services.data_service import upload_data, query_data
 # 新增import
 from app.services.data_service import compute_variance
+from app.services.data_service import preprocess_and_evaluate
 
 api_bp = Blueprint('api', __name__)  # 创建蓝图实例，管理一组相关的路由
 
@@ -19,3 +20,11 @@ def query():
 @api_bp.route('/variance', methods=['POST'])
 def variance():
     return compute_variance(request)  # 调用服务层计算方差
+
+# 计算LOF评分路由；
+@api_bp.route('/evaluate_lof', methods=['POST'])
+def evaluate_lof():
+    # 这里需要获取上传的数据，然后对其进行预处理和LOF评分
+    data = request.get_json()  
+    results = preprocess_and_evaluate(data)  # 使用预处理和LOF评分的函数
+    return jsonify(results)  # 返回JSON格式的结果
